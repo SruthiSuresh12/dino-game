@@ -27,6 +27,26 @@ let gameInterval;
 let obstacleInterval;
 let scoreInterval;
 
+// --- Obstacle Generation Settings ---
+// Time between obstacles (in milliseconds)
+const minObstacleInterval = 1000;
+const maxObstacleInterval = 2000;
+
+// Cactus size range
+const minCactusWidth = 10;
+const maxCactusWidth = 40;
+const minCactusHeight = 10;
+const maxCactusHeight = 40;
+
+// Bird size (fixed)
+const birdWidth = 25;
+const birdHeight = 15;
+
+// Obstacle type chance
+const birdChance = 0.4; // 40% chance of a bird
+
+// --- Game Logic ---
+
 function setupCanvas() {
     const gameContainer = document.getElementById('game-container');
     const containerWidth = gameContainer.offsetWidth;
@@ -87,29 +107,9 @@ function updateObstacles() {
 }
 
 function generateObstacle() {
-    const isBird = Math.random() < 0.4;
+    const isBird = Math.random() < birdChance;
     
-    if (!isBird) {
-        let obstacleWidth = dino.width * (0.5 + Math.random() * 2.5);
-        let obstacleHeight = dino.height * (Math.random() * 0.5); // Adjusted: Max height is 0.5x dino height
-        // To be more precise, let's cap the height to be jumpable,
-        // Dino's highest jump is `groundY` - `dino.dy`, which is `150 - 15 = 135`
-        // So the Dino's top is at 135. The obstacle top must be lower than 135 + its height.
-        // A simple way is to limit the height to be no more than the jump clearance.
-        let maxHeight = Math.abs(dino.dy); // 15 pixels
-        let obstacleHeightRandom = Math.random() * maxHeight;
-        
-        let newObstacle = {
-            x: canvas.width,
-            y: groundY + dino.height - obstacleHeightRandom,
-            width: obstacleWidth,
-            height: obstacleHeightRandom,
-            type: 'cactus'
-        };
-        obstacles.push(newObstacle);
-    } else {
-        const birdWidth = 25;
-        const birdHeight = 15;
+    if (isBird) {
         let newBird = {
             x: canvas.width,
             y: groundY - 30 - Math.random() * 50,
@@ -118,6 +118,17 @@ function generateObstacle() {
             type: 'bird'
         };
         obstacles.push(newBird);
+    } else {
+        let obstacleWidth = minCactusWidth + Math.random() * (maxCactusWidth - minCactusWidth);
+        let obstacleHeight = minCactusHeight + Math.random() * (maxCactusHeight - minCactusHeight);
+        let newObstacle = {
+            x: canvas.width,
+            y: groundY + dino.height - obstacleHeight,
+            width: obstacleWidth,
+            height: obstacleHeight,
+            type: 'cactus'
+        };
+        obstacles.push(newObstacle);
     }
 }
 
@@ -183,12 +194,11 @@ function gameLoop() {
 
 function startGame() {
     gameInterval = setInterval(gameLoop, 1000 / 60);
-    obstacleInterval = setInterval(() => {
-        generateObstacle();
-        const nextObstacleTime = 1000 + Math.random() * 1500;
-        clearInterval(obstacleInterval);
-        obstacleInterval = setInterval(generateObstacle, nextObstacleTime);
-    }, 2000);
+    
+    // Initial call and then set up the random timer
+    let randomObstacleTime = minObstacleInterval + Math.random() * (maxObstacleInterval - minObstacleInterval);
+    obstacleInterval = setInterval(generateObstacle, randomObstacleTime);
+    
     scoreInterval = setInterval(updateScore, 100);
 }
 

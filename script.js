@@ -84,8 +84,8 @@ function updateObstacles() {
 function generateObstacle() {
     // 70% chance of a cactus, 30% chance of a bird
     if (Math.random() > 0.3) {
-        let obstacleWidth = 10 + Math.random() * 10;
-        let obstacleHeight = 10 + Math.random() * 20;
+        let obstacleWidth = dino.width * (1 + Math.random()); // 1x to 2x dino width
+        let obstacleHeight = dino.height * (1 + Math.random()); // 1x to 2x dino height
         let newObstacle = {
             x: canvas.width,
             y: groundY + dino.height - obstacleHeight, // Correct placement on the ground

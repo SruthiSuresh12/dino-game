@@ -1,7 +1,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreDisplay = document.getElementById('score');
-const highScoreDisplay = document('high-score');
+const highScoreDisplay = document.getElementById('high-score'); // Corrected typo here
 const gameOverScreen = document.getElementById('game-over-screen');
 const restartBtn = document.getElementById('restart-btn');
 
@@ -33,9 +33,9 @@ const minObstacleInterval = 1000;
 const maxObstacleInterval = 2000;
 
 // Cactus size range
-const minCactusWidth = dino.width; // Min width is now 20
+const minCactusWidth = dino.width;
 const maxCactusWidth = 40;
-const minCactusHeight = dino.height; // Min height is now 30
+const minCactusHeight = dino.height;
 const maxCactusHeight = 40;
 
 // Bird size (fixed)
@@ -43,7 +43,7 @@ const birdWidth = 25;
 const birdHeight = 15;
 
 // Obstacle type chance
-const birdChance = 0.4; // 40% chance of a bird
+const birdChance = 0.4;
 
 // --- Game Logic ---
 
@@ -208,7 +208,6 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Changed from canvas.addEventListener to document.addEventListener
 document.addEventListener('touchstart', (e) => {
     jump();
 });

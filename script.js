@@ -1,7 +1,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreDisplay = document.getElementById('score');
-const highScoreDisplay = document.getElementById('high-score');
+const highScoreDisplay = document('high-score');
 const gameOverScreen = document.getElementById('game-over-screen');
 const restartBtn = document.getElementById('restart-btn');
 
@@ -33,9 +33,9 @@ const minObstacleInterval = 1000;
 const maxObstacleInterval = 2000;
 
 // Cactus size range
-const minCactusWidth = 10;
+const minCactusWidth = dino.width; // Min width is now 20
 const maxCactusWidth = 40;
-const minCactusHeight = 10;
+const minCactusHeight = dino.height; // Min height is now 30
 const maxCactusHeight = 40;
 
 // Bird size (fixed)
@@ -195,7 +195,6 @@ function gameLoop() {
 function startGame() {
     gameInterval = setInterval(gameLoop, 1000 / 60);
     
-    // Initial call and then set up the random timer
     let randomObstacleTime = minObstacleInterval + Math.random() * (maxObstacleInterval - minObstacleInterval);
     obstacleInterval = setInterval(generateObstacle, randomObstacleTime);
     
@@ -209,7 +208,8 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-canvas.addEventListener('touchstart', (e) => {
+// Changed from canvas.addEventListener to document.addEventListener
+document.addEventListener('touchstart', (e) => {
     jump();
 });
 

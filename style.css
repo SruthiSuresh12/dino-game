@@ -2,33 +2,31 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
     margin: 0;
-    font-family: 'Press Start 2P', cursive;
+    font-family: Arial, sans-serif; /* Changed to a standard font */
     background-color: #f7f7f7;
     flex-direction: column;
 }
 
-@font-face {
-    font-family: 'Press Start 2P';
-    src: url('https://fonts.gstatic.com/s/pressstart2p/v14/87s-jQZz9_ix-UL-M6-Pq4jB9eD_2lK2.woff2') format('woff2');
-    font-weight: normal;
-    font-style: normal;
-}
-
 #game-container {
     position: relative;
-    border-bottom: 2px solid #333;
     overflow: hidden;
+    width: 90vw; /* Responsive width */
+    max-width: 600px;
+    border-bottom: 2px solid #333; /* The ground line */
 }
 
 #gameCanvas {
     background-color: #fff;
+    width: 100%; /* Fill the container */
+    height: auto;
+    display: block;
 }
 
 #score-container, #high-score-container {
     position: absolute;
-    top: 10px;
+    top: 5px; /* Adjusted position */
     font-size: 14px;
     color: #535353;
 }
@@ -67,7 +65,7 @@ body {
 #restart-btn {
     background-color: #f7f7f7;
     border: 2px solid #535353;
-    font-family: 'Press Start 2P', cursive;
+    font-family: Arial, sans-serif;
     font-size: 1em;
     padding: 10px 20px;
     cursor: pointer;

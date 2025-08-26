@@ -87,26 +87,32 @@ function updateObstacles() {
 }
 
 function generateObstacle() {
-    // Determine the type of obstacle with more randomness
-    const isBird = Math.random() < 0.4; // Now a 40% chance of a bird, to make it more common
+    const isBird = Math.random() < 0.4;
     
     if (!isBird) {
-        let obstacleWidth = dino.width * (0.5 + Math.random() * 2.5); // Wider range: 0.5x to 3x dino width
-        let obstacleHeight = dino.height * (0.5 + Math.random() * 1.5); // Wider range: 0.5x to 2x dino height
+        let obstacleWidth = dino.width * (0.5 + Math.random() * 2.5);
+        let obstacleHeight = dino.height * (Math.random() * 0.5); // Adjusted: Max height is 0.5x dino height
+        // To be more precise, let's cap the height to be jumpable,
+        // Dino's highest jump is `groundY` - `dino.dy`, which is `150 - 15 = 135`
+        // So the Dino's top is at 135. The obstacle top must be lower than 135 + its height.
+        // A simple way is to limit the height to be no more than the jump clearance.
+        let maxHeight = Math.abs(dino.dy); // 15 pixels
+        let obstacleHeightRandom = Math.random() * maxHeight;
+        
         let newObstacle = {
             x: canvas.width,
-            y: groundY + dino.height - obstacleHeight,
+            y: groundY + dino.height - obstacleHeightRandom,
             width: obstacleWidth,
-            height: obstacleHeight,
+            height: obstacleHeightRandom,
             type: 'cactus'
         };
         obstacles.push(newObstacle);
     } else {
-        let birdWidth = dino.width * (0.8 + Math.random() * 0.8); // Wider range: 0.8x to 1.6x dino width
-        let birdHeight = dino.height * (0.5 + Math.random() * 0.5); // Wider range: 0.5x to 1x dino height
+        const birdWidth = 25;
+        const birdHeight = 15;
         let newBird = {
             x: canvas.width,
-            y: groundY - 30 - Math.random() * 50, // More varied vertical position
+            y: groundY - 30 - Math.random() * 50,
             width: birdWidth,
             height: birdHeight,
             type: 'bird'
@@ -177,13 +183,12 @@ function gameLoop() {
 
 function startGame() {
     gameInterval = setInterval(gameLoop, 1000 / 60);
-    // Introduce random intervals for obstacles to make the gap less predictable
     obstacleInterval = setInterval(() => {
         generateObstacle();
-        const nextObstacleTime = 1000 + Math.random() * 1500; // Random time between 1s and 2.5s
+        const nextObstacleTime = 1000 + Math.random() * 1500;
         clearInterval(obstacleInterval);
         obstacleInterval = setInterval(generateObstacle, nextObstacleTime);
-    }, 2000); // Initial delay
+    }, 2000);
     scoreInterval = setInterval(updateScore, 100);
 }
 

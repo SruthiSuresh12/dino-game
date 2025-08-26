@@ -5,9 +5,14 @@ const highScoreDisplay = document.getElementById('high-score');
 const gameOverScreen = document.getElementById('game-over-screen');
 const restartBtn = document.getElementById('restart-btn');
 
+const originalCanvasWidth = 600;
+const originalCanvasHeight = 200;
+let scaleFactor;
+const groundY = 150;
+
 let dino = {
     x: 50,
-    y: 150,
+    y: groundY,
     width: 20,
     height: 30,
     dy: 0,
@@ -23,17 +28,28 @@ let gameInterval;
 let obstacleInterval;
 let scoreInterval;
 
+function setupCanvas() {
+    const gameContainer = document.getElementById('game-container');
+    const containerWidth = gameContainer.offsetWidth;
+    scaleFactor = containerWidth / originalCanvasWidth;
+    
+    canvas.width = originalCanvasWidth;
+    canvas.height = originalCanvasHeight;
+    canvas.style.width = containerWidth + 'px';
+    canvas.style.height = (originalCanvasHeight * scaleFactor) + 'px';
+}
+
 function drawDino() {
-    ctx.fillStyle = '#535353';
+    ctx.fillStyle = '#4CAF50'; // Bright green
     ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
 }
 
 function drawObstacles() {
     obstacles.forEach(obstacle => {
         if (obstacle.type === 'cactus') {
-            ctx.fillStyle = '#535353';
+            ctx.fillStyle = '#228B22'; // Darker green
         } else if (obstacle.type === 'bird') {
-            ctx.fillStyle = '#888';
+            ctx.fillStyle = '#87CEEB'; // Light blue
         }
         ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
     });
@@ -43,8 +59,8 @@ function updateDino() {
     dino.dy += dino.gravity;
     dino.y += dino.dy;
 
-    if (dino.y >= 150) {
-        dino.y = 150;
+    if (dino.y >= groundY) {
+        dino.y = groundY;
         dino.isJumping = false;
         dino.dy = 0;
     }
@@ -72,7 +88,7 @@ function generateObstacle() {
         let obstacleHeight = 10 + Math.random() * 20;
         let newObstacle = {
             x: canvas.width,
-            y: 150 - obstacleHeight,
+            y: groundY + dino.height - obstacleHeight, // Correct placement on the ground
             width: obstacleWidth,
             height: obstacleHeight,
             type: 'cactus'
@@ -83,7 +99,7 @@ function generateObstacle() {
         let birdHeight = 15;
         let newBird = {
             x: canvas.width,
-            y: 130 - Math.random() * 20, // Random vertical position to add variety
+            y: groundY - 30 - Math.random() * 30, // Random vertical position above the ground
             width: birdWidth,
             height: birdHeight,
             type: 'bird'
@@ -128,7 +144,7 @@ function gameOver() {
 }
 
 function resetGame() {
-    dino.y = 150;
+    dino.y = groundY;
     dino.isJumping = false;
     obstacles = [];
     score = 0;
@@ -170,6 +186,8 @@ canvas.addEventListener('touchstart', (e) => {
 
 restartBtn.addEventListener('click', resetGame);
 
-// Initial game setup
+// Initial game setup and event listener for resizing
 highScoreDisplay.textContent = highScore;
+setupCanvas();
 startGame();
+window.addEventListener('resize', setupCanvas);

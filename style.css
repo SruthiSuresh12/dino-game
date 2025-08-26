@@ -4,7 +4,7 @@ body {
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    font-family: Arial, sans-serif;
+    font-family: 'Courier New', monospace; /* Changed to Courier New */
     background-color: #f7f7f7;
     flex-direction: column;
 }
@@ -12,13 +12,13 @@ body {
 #game-container {
     position: relative;
     overflow: hidden;
-    width: 100%; /* Changed to 100% */
+    width: 100%;
     max-width: 600px;
 }
 
 #gameCanvas {
     background-color: #fff;
-    width: 100%; /* Fill the container */
+    width: 100%;
     height: auto;
     display: block;
 }
@@ -39,7 +39,8 @@ body {
 }
 
 #game-over-screen {
-    position: absolute;
+    /* Now fixed to the viewport */
+    position: fixed; 
     top: 0;
     left: 0;
     width: 100%;
@@ -50,6 +51,7 @@ body {
     justify-content: center;
     align-items: center;
     text-align: center;
+    z-index: 100; /* Ensure it's on top of everything */
 }
 
 #game-over-screen.hidden {
@@ -64,7 +66,7 @@ body {
 #restart-btn {
     background-color: #f7f7f7;
     border: 2px solid #535353;
-    font-family: Arial, sans-serif;
+    font-family: 'Courier New', monospace; /* Changed to Courier New */
     font-size: 1em;
     padding: 10px 20px;
     cursor: pointer;

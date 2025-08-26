@@ -32,11 +32,9 @@ function setupCanvas() {
     const containerWidth = gameContainer.offsetWidth;
     const containerHeight = containerWidth * (originalCanvasHeight / originalCanvasWidth);
     
-    // Set the display size
     canvas.style.width = containerWidth + 'px';
     canvas.style.height = containerHeight + 'px';
     
-    // Set the internal canvas dimensions for game logic
     canvas.width = originalCanvasWidth;
     canvas.height = originalCanvasHeight;
 }
@@ -89,9 +87,12 @@ function updateObstacles() {
 }
 
 function generateObstacle() {
-    if (Math.random() > 0.3) {
-        let obstacleWidth = dino.width * (0.8 + Math.random());
-        let obstacleHeight = dino.height * (0.8 + Math.random());
+    // Determine the type of obstacle with more randomness
+    const isBird = Math.random() < 0.4; // Now a 40% chance of a bird, to make it more common
+    
+    if (!isBird) {
+        let obstacleWidth = dino.width * (0.5 + Math.random() * 2.5); // Wider range: 0.5x to 3x dino width
+        let obstacleHeight = dino.height * (0.5 + Math.random() * 1.5); // Wider range: 0.5x to 2x dino height
         let newObstacle = {
             x: canvas.width,
             y: groundY + dino.height - obstacleHeight,
@@ -101,11 +102,11 @@ function generateObstacle() {
         };
         obstacles.push(newObstacle);
     } else {
-        let birdWidth = 25;
-        let birdHeight = 15;
+        let birdWidth = dino.width * (0.8 + Math.random() * 0.8); // Wider range: 0.8x to 1.6x dino width
+        let birdHeight = dino.height * (0.5 + Math.random() * 0.5); // Wider range: 0.5x to 1x dino height
         let newBird = {
             x: canvas.width,
-            y: groundY - 30 - Math.random() * 30,
+            y: groundY - 30 - Math.random() * 50, // More varied vertical position
             width: birdWidth,
             height: birdHeight,
             type: 'bird'
@@ -176,7 +177,13 @@ function gameLoop() {
 
 function startGame() {
     gameInterval = setInterval(gameLoop, 1000 / 60);
-    obstacleInterval = setInterval(generateObstacle, 2000);
+    // Introduce random intervals for obstacles to make the gap less predictable
+    obstacleInterval = setInterval(() => {
+        generateObstacle();
+        const nextObstacleTime = 1000 + Math.random() * 1500; // Random time between 1s and 2.5s
+        clearInterval(obstacleInterval);
+        obstacleInterval = setInterval(generateObstacle, nextObstacleTime);
+    }, 2000); // Initial delay
     scoreInterval = setInterval(updateScore, 100);
 }
 

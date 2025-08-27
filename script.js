@@ -62,11 +62,11 @@ const birdHeight = 15;
 
 const birdChance = 0.3;
 
-// Cactus size range (made a bit smaller)
+// Cactus size range
 const minCactusWidth = 25; 
-const maxCactusWidth = 45; 
+const maxCactusWidth = 42; 
 const minCactusHeight = 25;
-const maxCactusHeight = 45; 
+const maxCactusHeight = 42; 
 
 // --- Game Logic ---
 
@@ -120,7 +120,7 @@ function updateDino() {
 function jump() {
     if (!dino.isJumping) {
         dino.isJumping = true;
-        dino.dy = -20;
+        dino.dy = -16.5;
     }
 }
 

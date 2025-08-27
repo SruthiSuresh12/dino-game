@@ -5,8 +5,8 @@ const highScoreDisplay = document.getElementById('high-score');
 const gameOverScreen = document.getElementById('game-over-screen');
 const restartBtn = document.getElementById('restart-btn');
 
-const originalCanvasWidth = 600;
-const originalCanvasHeight = 200;
+const originalCanvasWidth = 500;
+const originalCanvasHeight = 350;
 const groundY = 150;
 
 // --- Image Assets ---
@@ -54,8 +54,8 @@ let scoreInterval;
 let isNight = false;
 
 // --- Obstacle Generation Settings ---
-const minObstacleInterval = 1000;
-const maxObstacleInterval = 1200;
+const minObstacleInterval = 1200;
+const maxObstacleInterval = 1800;
 
 const birdWidth = 25;
 const birdHeight = 15;

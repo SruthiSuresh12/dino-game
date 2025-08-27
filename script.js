@@ -1,7 +1,7 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreDisplay = document.getElementById('score');
-const highScoreDisplay = document.getElementById('high-score'); // Corrected typo here
+const highScoreDisplay = document.getElementById('high-score');
 const gameOverScreen = document.getElementById('game-over-screen');
 const restartBtn = document.getElementById('restart-btn');
 
@@ -9,6 +9,31 @@ const originalCanvasWidth = 600;
 const originalCanvasHeight = 200;
 const groundY = 150;
 
+// --- Image Assets ---
+let dinoImg = new Image();
+dinoImg.src = 'images/dino.png';
+
+let birdWingUpImg = new Image();
+birdWingUpImg.src = 'images/bird_wing_up.png';
+let birdWingDownImg = new Image();
+birdWingDownImg.src = 'images/bird_wing_down.png';
+
+const cactusImgs = [
+    'images/cactus1.png',
+    'images/cactus2.png',
+    'images/cactus3.png',
+    'images/cactus4.png',
+    'images/cactus5.png',
+    'images/cactus6.png',
+    'images/cactus7.png',
+    'images/cactus8.png'
+].map(src => {
+    let img = new Image();
+    img.src = src;
+    return img;
+});
+
+// --- Game Objects and Variables ---
 let dino = {
     x: 50,
     y: groundY,
@@ -28,22 +53,13 @@ let obstacleInterval;
 let scoreInterval;
 
 // --- Obstacle Generation Settings ---
-// Time between obstacles (in milliseconds)
-const minObstacleInterval = 1000;
-const maxObstacleInterval = 2000;
+const minObstacleInterval = 750;
+const maxObstacleInterval = 1000;
 
-// Cactus size range
-const minCactusWidth = dino.width;
-const maxCactusWidth = 40;
-const minCactusHeight = dino.height;
-const maxCactusHeight = 40;
-
-// Bird size (fixed)
 const birdWidth = 25;
 const birdHeight = 15;
 
-// Obstacle type chance
-const birdChance = 0.4;
+const birdChance = 0.3;
 
 // --- Game Logic ---
 
@@ -51,10 +67,10 @@ function setupCanvas() {
     const gameContainer = document.getElementById('game-container');
     const containerWidth = gameContainer.offsetWidth;
     const containerHeight = containerWidth * (originalCanvasHeight / originalCanvasWidth);
-    
+
     canvas.style.width = containerWidth + 'px';
     canvas.style.height = containerHeight + 'px';
-    
+
     canvas.width = originalCanvasWidth;
     canvas.height = originalCanvasHeight;
 }
@@ -65,18 +81,21 @@ function drawGround() {
 }
 
 function drawDino() {
-    ctx.fillStyle = '#FF0000';
-    ctx.fillRect(dino.x, dino.y, dino.width, dino.height);
+    ctx.drawImage(dinoImg, dino.x, dino.y, dino.width, dino.height);
 }
 
 function drawObstacles() {
     obstacles.forEach(obstacle => {
-        if (obstacle.type === 'cactus') {
-            ctx.fillStyle = '#228B22';
-        } else if (obstacle.type === 'bird') {
-            ctx.fillStyle = '#87CEEB';
+        // Handle flapping animation for the bird
+        if (obstacle.type === 'bird') {
+            obstacle.frameCounter++;
+            if (obstacle.frameCounter >= obstacle.frameSpeed) {
+                obstacle.currentFrame = (obstacle.currentFrame + 1) % 2;
+                obstacle.img = obstacle.currentFrame === 0 ? birdWingUpImg : birdWingDownImg;
+                obstacle.frameCounter = 0;
+            }
         }
-        ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+        ctx.drawImage(obstacle.img, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
     });
 }
 
@@ -108,25 +127,32 @@ function updateObstacles() {
 
 function generateObstacle() {
     const isBird = Math.random() < birdChance;
-    
+
     if (isBird) {
         let newBird = {
             x: canvas.width,
             y: groundY - 30 - Math.random() * 50,
             width: birdWidth,
             height: birdHeight,
-            type: 'bird'
+            type: 'bird',
+            currentFrame: 0,
+            frameCounter: 0,
+            frameSpeed: 10,
+            img: birdWingUpImg
         };
         obstacles.push(newBird);
     } else {
-        let obstacleWidth = minCactusWidth + Math.random() * (maxCactusWidth - minCactusWidth);
-        let obstacleHeight = minCactusHeight + Math.random() * (maxCactusHeight - minCactusHeight);
+        const randomCactusImg = cactusImgs[Math.floor(Math.random() * cactusImgs.length)];
+        const cactusWidth = randomCactusImg.width / (randomCactusImg.height / dino.height) * (0.8 + Math.random() * 0.4);
+        const cactusHeight = dino.height * (0.8 + Math.random() * 0.4);
+
         let newObstacle = {
             x: canvas.width,
-            y: groundY + dino.height - obstacleHeight,
-            width: obstacleWidth,
-            height: obstacleHeight,
-            type: 'cactus'
+            y: groundY + dino.height - cactusHeight,
+            width: cactusWidth,
+            height: cactusHeight,
+            type: 'cactus',
+            img: randomCactusImg
         };
         obstacles.push(newObstacle);
     }
@@ -163,7 +189,7 @@ function gameOver() {
         localStorage.setItem('dinoHighScore', highScore);
         highScoreDisplay.textContent = highScore;
     }
-    
+
     gameOverScreen.classList.remove('hidden');
 }
 
@@ -175,33 +201,51 @@ function resetGame() {
     gameSpeed = 3;
     scoreDisplay.textContent = score;
     gameOverScreen.classList.add('hidden');
-    
+
     startGame();
 }
 
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     drawGround();
     drawDino();
     updateDino();
-    
+
     drawObstacles();
     updateObstacles();
-    
+
     checkCollision();
 }
 
 function startGame() {
     gameInterval = setInterval(gameLoop, 1000 / 60);
-    
+
     let randomObstacleTime = minObstacleInterval + Math.random() * (maxObstacleInterval - minObstacleInterval);
     obstacleInterval = setInterval(generateObstacle, randomObstacleTime);
-    
+
     scoreInterval = setInterval(updateScore, 100);
 }
 
-// Event listeners
+// --- Initial Setup and Event Listeners ---
+let imagesLoaded = 0;
+const totalImages = 1 + 2 + cactusImgs.length; // 1 dino + 2 birds + 8 cacti
+
+function imageLoadHandler() {
+    imagesLoaded++;
+    if (imagesLoaded === totalImages) {
+        highScoreDisplay.textContent = highScore;
+        setupCanvas();
+        startGame();
+        window.addEventListener('resize', setupCanvas);
+    }
+}
+
+dinoImg.onload = imageLoadHandler;
+birdWingUpImg.onload = imageLoadHandler;
+birdWingDownImg.onload = imageLoadHandler;
+cactusImgs.forEach(img => img.onload = imageLoadHandler);
+
 document.addEventListener('keydown', (e) => {
     if (e.code === 'Space' || e.code === 'ArrowUp') {
         jump();
@@ -213,9 +257,3 @@ document.addEventListener('touchstart', (e) => {
 });
 
 restartBtn.addEventListener('click', resetGame);
-
-// Initial game setup and event listener for resizing
-highScoreDisplay.textContent = highScore;
-setupCanvas();
-startGame();
-window.addEventListener('resize', setupCanvas);

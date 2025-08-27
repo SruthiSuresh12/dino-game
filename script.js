@@ -1,126 +1,242 @@
+Const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const scoreDisplay = document.getElementById('score');
+const highScoreDisplay = document.getElementById('high-score');
+const gameOverScreen = document.getElementById('game-over-screen');
+const restartBtn = document.getElementById('restart-btn');
+
+const originalCanvasWidth = 500;
+const originalCanvasHeight = 250;
+const groundY = 180;
+
+let dinoImg = new Image();
+dinoImg.src = 'images/dino.png';
+
+let birdWingUpImg = new Image();
+birdWingUpImg.src = 'images/bird_wing_up.png';
+let birdWingDownImg = new Image();
+birdWingDownImg.src = 'images/bird_wing_down.png';
+
+const cactusImgs = [
+    'images/cactus1.png',
+    'images/cactus2.png',
+    'images/cactus3.png',
+    'images/cactus4.png',
+    'images/cactus5.png',
+    'images/cactus6.png',
+    'images/cactus7.png',
+    'images/cactus8.png'
+].map(src => {
+    let img = new Image();
+    img.src = src;
+    return img;
+});
+
+const jumpSound = new Audio('sounds/jump.wav');
+const pointSound = new Audio('sounds/point.wav');
+const gameoverSound = new Audio('sounds/die.wav');
+
+let dino = {
+    x: 50,
+    y: groundY,
+    width: 30,
+    height: 30,
+    dy: 0,
+    gravity: 0.9,
+    isJumping: false,
+};
+
+let obstacles = [];
+let score = 0;
+let highScore = localStorage.getItem('dinoHighScore') || 0;
+let gameSpeed = 3;
 let gameInterval;
 let obstacleInterval;
 let scoreInterval;
-let score = 0;
-let highScore = 0;
-let obstacleSpeed = 5;
-const MAX_OBSTACLE_SPEED = 15;
+let isNight = false;
+
 const minObstacleInterval = 1200;
-const maxObstacleInterval = 3000;
-let obstacles = [];
-let dino = { x: 50, y: 150, width: 60, height: 60, dy: 0, gravity: 0.6, jumpPower: 12, isJumping: false };
+const maxObstacleInterval = 1500;
 
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const restartBtn = document.getElementById('restartBtn');
-const scoreDisplay = document.getElementById('score');
-const highScoreDisplay = document.getElementById('highScore');
+const birdWidth = 25;
+const birdHeight = 15;
 
-const dinoImg = new Image();
-const birdWingUpImg = new Image();
-const birdWingDownImg = new Image();
-const cactusImgs = [new Image(), new Image(), new Image()];
+const birdChance = 0.3;
 
-const jumpSound = new Audio('jump.wav');
-const pointSound = new Audio('point.wav');
-const dieSound = new Audio('die.wav');
+const minCactusWidth = 25; 
+const maxCactusWidth = 42; 
+const minCactusHeight = 25;
+const maxCactusHeight = 42; 
 
-function updateDino() {
-    dino.y += dino.dy;
-    dino.dy += dino.gravity;
+function setupCanvas() {
+    const gameContainer = document.getElementById('game-container');
+    const containerWidth = gameContainer.offsetWidth;
+    const containerHeight = containerWidth * (originalCanvasHeight / originalCanvasWidth);
 
-    if (dino.y >= 150) {
-        dino.y = 150;
-        dino.isJumping = false;
-    }
+    canvas.style.width = containerWidth + 'px';
+    canvas.style.height = containerHeight + 'px';
+
+    canvas.width = originalCanvasWidth;
+    canvas.height = originalCanvasHeight;
+}
+
+function drawGround() {
+    ctx.fillStyle = '#C9ADA1';
+    ctx.fillRect(0, groundY + dino.height, canvas.width, canvas.height - (groundY + dino.height));
+}
+
+function drawDino() {
+    ctx.drawImage(dinoImg, dino.x, dino.y, dino.width, dino.height);
 }
 
 function drawObstacles() {
     obstacles.forEach(obstacle => {
+        if (obstacle.type === 'bird') {
+            obstacle.frameCounter++;
+            if (obstacle.frameCounter >= obstacle.frameSpeed) {
+                obstacle.currentFrame = (obstacle.currentFrame + 1) % 2;
+                obstacle.img = obstacle.currentFrame === 0 ? birdWingUpImg : birdWingDownImg;
+                obstacle.frameCounter = 0;
+            }
+        }
         ctx.drawImage(obstacle.img, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
     });
 }
 
+function updateDino() {
+    dino.dy += dino.gravity;
+    dino.y += dino.dy;
+
+    if (dino.y >= groundY) {
+        dino.y = groundY;
+        dino.isJumping = false;
+        dino.dy = 0;
+    }
+}
+
+function jump() {
+    if (!dino.isJumping) {
+        dino.isJumping = true;
+        dino.dy = -16;
+        jumpSound.play();
+    }
+}
+
 function updateObstacles() {
     obstacles.forEach(obstacle => {
-        obstacle.x -= obstacleSpeed;
+        obstacle.x -= gameSpeed;
     });
-
-    if (obstacleSpeed < MAX_OBSTACLE_SPEED) {
-        obstacleSpeed += 0.001;
-    }
 
     obstacles = obstacles.filter(obstacle => obstacle.x + obstacle.width > 0);
 }
 
-function checkCollision() {
-    obstacles.forEach(obstacle => {
-        if (dino.x < obstacle.x + obstacle.width &&
-            dino.x + dino.width > obstacle.x &&
-            dino.y < obstacle.y + obstacle.height &&
-            dino.y + dino.height > obstacle.y) {
-            dieSound.play();
-            resetGame();
-        }
-    });
-}
-
 function generateObstacle() {
-    const obstacleType = Math.random() < 0.7 ? 'cactus' : 'bird';
-    let newObstacle;
+    const isBird = Math.random() < birdChance;
 
-    if (obstacleType === 'cactus') {
-        const cactusIndex = Math.floor(Math.random() * cactusImgs.length);
-        newObstacle = {
+    if (isBird) {
+        let newBird = {
             x: canvas.width,
-            y: 150,
-            width: 30,
-            height: 60,
-            img: cactusImgs[cactusIndex]
-        };
-    } else {
-        const birdY = Math.random() > 0.5 ? 100 : 130;
-        newObstacle = {
-            x: canvas.width,
-            y: birdY,
-            width: 40,
-            height: 30,
+            y: groundY - 30 - Math.random() * 50,
+            width: birdWidth,
+            height: birdHeight,
+            type: 'bird',
+            currentFrame: 0,
+            frameCounter: 0,
+            frameSpeed: 10,
             img: birdWingUpImg
         };
+        obstacles.push(newBird);
+    } else {
+        const randomCactusImg = cactusImgs[Math.floor(Math.random() * cactusImgs.length)];
+        let obstacleWidth = minCactusWidth + Math.random() * (maxCactusWidth - minCactusWidth);
+        let obstacleHeight = minCactusHeight + Math.random() * (maxCactusHeight - minCactusHeight);
+
+        let newObstacle = {
+            x: canvas.width,
+            y: groundY + dino.height - obstacleHeight,
+            width: obstacleWidth,
+            height: obstacleHeight,
+            type: 'cactus',
+            img: randomCactusImg
+        };
+        obstacles.push(newObstacle);
     }
-    obstacles.push(newObstacle);
+}
+
+function checkCollision() {
+    obstacles.forEach(obstacle => {
+        if (
+            dino.x < obstacle.x + obstacle.width &&
+            dino.x + dino.width > obstacle.x &&
+            dino.y < obstacle.y + obstacle.height &&
+            dino.y + dino.height > obstacle.y
+        ) {
+            gameOver();
+        }
+    });
 }
 
 function updateScore() {
     score++;
     scoreDisplay.textContent = score;
+    if (score % 100 === 0) {
+        const maxGameSpeed = 8; // Cap the game speed at a maximum value
+        if (gameSpeed < maxGameSpeed) {
+            gameSpeed += 0.5;
+        }
+        pointSound.play();
+        clearInterval(obstacleInterval);
+        const minTimeBetweenObstacles = 1000; // Cap the interval at 1 second
+        const newObstacleTime = Math.max((minObstacleInterval + Math.random() * (maxObstacleInterval - minObstacleInterval)) / gameSpeed, minTimeBetweenObstacles);
+        obstacleInterval = setInterval(generateObstacle, newObstacleTime);
+    }
 
-    if (score > highScore) {
-        highScore = score;
-        highScoreDisplay.textContent = highScore;
+    if (score % 1000 === 0) {
+        isNight = !isNight;
     }
 }
 
-function resetGame() {
+function gameOver() {
     clearInterval(gameInterval);
     clearInterval(obstacleInterval);
     clearInterval(scoreInterval);
+
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('dinoHighScore', highScore);
+        highScoreDisplay.textContent = highScore;
+    }
+
+    gameoverSound.play();
+    gameOverScreen.classList.remove('hidden');
+}
+
+function resetGame() {
+    dino.y = groundY;
+    dino.isJumping = false;
     obstacles = [];
     score = 0;
+    gameSpeed = 3;
+    isNight = false;
     scoreDisplay.textContent = score;
-    dino.y = 150;
-    dino.dy = 0;
-    dino.isJumping = false;
-    obstacleSpeed = 5;
+    gameOverScreen.classList.add('hidden');
+
     startGame();
 }
 
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    ctx.fillStyle = isNight ? '#BFD1E5' : '#d8eceb';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    drawGround();
+    drawDino();
     updateDino();
+
     drawObstacles();
     updateObstacles();
+
     checkCollision();
 }
 
@@ -133,21 +249,8 @@ function startGame() {
     scoreInterval = setInterval(updateScore, 100);
 }
 
-function setupCanvas() {
-    canvas.width = window.innerWidth * 0.8;
-    canvas.height = 200;
-}
-
-function jump() {
-    if (!dino.isJumping) {
-        dino.isJumping = true;
-        dino.dy = -dino.jumpPower;
-        jumpSound.play();
-    }
-}
-
 let imagesLoaded = 0;
-const totalImages = 1 + 2 + cactusImgs.length;
+const totalImages = 1 + 2 + cactusImgs.length; 
 
 function imageLoadHandler() {
     imagesLoaded++;
@@ -170,7 +273,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-document.addEventListener('touchstart', () => {
+document.addEventListener('touchstart', (e) => {
     jump();
 });
 

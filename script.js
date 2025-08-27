@@ -5,11 +5,10 @@ const highScoreDisplay = document.getElementById('high-score');
 const gameOverScreen = document.getElementById('game-over-screen');
 const restartBtn = document.getElementById('restart-btn');
 
-const originalCanvasWidth = 500;
-const originalCanvasHeight = 250;
-const groundY = 180;
+const originalCanvasWidth = 600;
+const originalCanvasHeight = 200;
+const groundY = 150;
 
-// --- Image Assets ---
 let dinoImg = new Image();
 dinoImg.src = 'images/dino.png';
 
@@ -33,7 +32,10 @@ const cactusImgs = [
     return img;
 });
 
-// --- Game Objects and Variables ---
+const jumpSound = new Audio('sounds/jump.mp3');
+const pointSound = new Audio('sounds/point.mp3');
+const gameoverSound = new Audio('sounds/gameover.mp3');
+
 let dino = {
     x: 50,
     y: groundY,
@@ -53,22 +55,18 @@ let obstacleInterval;
 let scoreInterval;
 let isNight = false;
 
-// --- Obstacle Generation Settings ---
-const minObstacleInterval = 1200;
-const maxObstacleInterval = 1400;
+const minObstacleInterval = 1000;
+const maxObstacleInterval = 1200;
 
 const birdWidth = 25;
 const birdHeight = 15;
 
 const birdChance = 0.3;
 
-// Cactus size range
 const minCactusWidth = 25; 
-const maxCactusWidth = 42; 
+const maxCactusWidth = 45; 
 const minCactusHeight = 25;
-const maxCactusHeight = 42; 
-
-// --- Game Logic ---
+const maxCactusHeight = 45; 
 
 function setupCanvas() {
     const gameContainer = document.getElementById('game-container');
@@ -93,7 +91,6 @@ function drawDino() {
 
 function drawObstacles() {
     obstacles.forEach(obstacle => {
-        // Handle flapping animation for the bird
         if (obstacle.type === 'bird') {
             obstacle.frameCounter++;
             if (obstacle.frameCounter >= obstacle.frameSpeed) {
@@ -120,7 +117,8 @@ function updateDino() {
 function jump() {
     if (!dino.isJumping) {
         dino.isJumping = true;
-        dino.dy = -16;
+        dino.dy = -20;
+        jumpSound.play();
     }
 }
 
@@ -183,9 +181,13 @@ function updateScore() {
     scoreDisplay.textContent = score;
     if (score % 100 === 0) {
         gameSpeed += 0.5;
+        pointSound.play();
+        clearInterval(obstacleInterval);
+        const newObstacleTime = (minObstacleInterval + Math.random() * (maxObstacleInterval - minObstacleInterval)) / gameSpeed;
+        obstacleInterval = setInterval(generateObstacle, newObstacleTime);
     }
     
-    if (score % 1500 === 0) {
+    if (score % 1000 === 0) {
         isNight = !isNight;
     }
 }
@@ -200,7 +202,8 @@ function gameOver() {
         localStorage.setItem('dinoHighScore', highScore);
         highScoreDisplay.textContent = highScore;
     }
-
+    
+    gameoverSound.play();
     gameOverScreen.classList.remove('hidden');
 }
 
@@ -220,8 +223,7 @@ function resetGame() {
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Day/Night sky color
-    ctx.fillStyle = isNight ? '#8093f1' : '#d8eceb';
+    ctx.fillStyle = isNight ? '#BFD1E5' : '#d8eceb';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     drawGround();
@@ -236,14 +238,13 @@ function gameLoop() {
 
 function startGame() {
     gameInterval = setInterval(gameLoop, 1000 / 60);
-
-    let randomObstacleTime = minObstacleInterval + Math.random() * (maxObstacleInterval - minObstacleInterval);
+    
+    const randomObstacleTime = minObstacleInterval + Math.random() * (maxObstacleInterval - minObstacleInterval);
     obstacleInterval = setInterval(generateObstacle, randomObstacleTime);
 
     scoreInterval = setInterval(updateScore, 100);
 }
 
-// --- Initial Setup and Event Listeners ---
 let imagesLoaded = 0;
 const totalImages = 1 + 2 + cactusImgs.length; 
 

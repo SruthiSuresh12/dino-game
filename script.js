@@ -37,7 +37,7 @@ const cactusImgs = [
 let dino = {
     x: 50,
     y: groundY,
-    width: 20,
+    width: 30,
     height: 30,
     dy: 0,
     gravity: 0.9,
@@ -51,6 +51,7 @@ let gameSpeed = 3;
 let gameInterval;
 let obstacleInterval;
 let scoreInterval;
+let isNight = false;
 
 // --- Obstacle Generation Settings ---
 const minObstacleInterval = 1000;
@@ -60,6 +61,12 @@ const birdWidth = 25;
 const birdHeight = 15;
 
 const birdChance = 0.3;
+
+// Cactus size range (made a bit bigger)
+const minCactusWidth = dino.width;
+const maxCactusWidth = 50; 
+const minCactusHeight = dino.height;
+const maxCactusHeight = 60; 
 
 // --- Game Logic ---
 
@@ -143,14 +150,14 @@ function generateObstacle() {
         obstacles.push(newBird);
     } else {
         const randomCactusImg = cactusImgs[Math.floor(Math.random() * cactusImgs.length)];
-        const cactusWidth = randomCactusImg.width / (randomCactusImg.height / dino.height) * (0.8 + Math.random() * 0.4);
-        const cactusHeight = dino.height * (0.8 + Math.random() * 0.4);
+        let obstacleWidth = minCactusWidth + Math.random() * (maxCactusWidth - minCactusWidth);
+        let obstacleHeight = minCactusHeight + Math.random() * (maxCactusHeight - minCactusHeight);
 
         let newObstacle = {
             x: canvas.width,
-            y: groundY + dino.height - cactusHeight,
-            width: cactusWidth,
-            height: cactusHeight,
+            y: groundY + dino.height - obstacleHeight,
+            width: obstacleWidth,
+            height: obstacleHeight,
             type: 'cactus',
             img: randomCactusImg
         };
@@ -177,6 +184,11 @@ function updateScore() {
     if (score % 100 === 0) {
         gameSpeed += 0.5;
     }
+    
+    // Change background color based on score
+    if (score % 1500 === 0) {
+        isNight = !isNight;
+    }
 }
 
 function gameOver() {
@@ -199,6 +211,7 @@ function resetGame() {
     obstacles = [];
     score = 0;
     gameSpeed = 3;
+    isNight = false; // Reset to daytime on new game
     scoreDisplay.textContent = score;
     gameOverScreen.classList.add('hidden');
 
@@ -207,6 +220,10 @@ function resetGame() {
 
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Day/Night sky color
+    ctx.fillStyle = isNight ? '#bcb4ad' : '#d8eceb';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     drawGround();
     drawDino();
@@ -229,7 +246,7 @@ function startGame() {
 
 // --- Initial Setup and Event Listeners ---
 let imagesLoaded = 0;
-const totalImages = 1 + 2 + cactusImgs.length; // 1 dino + 2 birds + 8 cacti
+const totalImages = 1 + 2 + cactusImgs.length; 
 
 function imageLoadHandler() {
     imagesLoaded++;
@@ -257,3 +274,4 @@ document.addEventListener('touchstart', (e) => {
 });
 
 restartBtn.addEventListener('click', resetGame);
+

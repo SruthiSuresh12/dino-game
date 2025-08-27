@@ -62,11 +62,11 @@ const birdHeight = 15;
 
 const birdChance = 0.3;
 
-// Cactus size range (made a bit bigger)
-const minCactusWidth = dino.width;
-const maxCactusWidth = 50; 
-const minCactusHeight = dino.height;
-const maxCactusHeight = 60; 
+// Cactus size range (made a bit smaller)
+const minCactusWidth = 25; 
+const maxCactusWidth = 45; 
+const minCactusHeight = 25;
+const maxCactusHeight = 45; 
 
 // --- Game Logic ---
 
@@ -185,7 +185,6 @@ function updateScore() {
         gameSpeed += 0.5;
     }
     
-    // Change background color based on score
     if (score % 1500 === 0) {
         isNight = !isNight;
     }
@@ -211,7 +210,7 @@ function resetGame() {
     obstacles = [];
     score = 0;
     gameSpeed = 3;
-    isNight = false; // Reset to daytime on new game
+    isNight = false;
     scoreDisplay.textContent = score;
     gameOverScreen.classList.add('hidden');
 
@@ -222,7 +221,7 @@ function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     // Day/Night sky color
-    ctx.fillStyle = isNight ? '#bcb4ad' : '#d8eceb';
+    ctx.fillStyle = isNight ? '#b5a2c8' : '#d8eceb';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     drawGround();
@@ -274,4 +273,3 @@ document.addEventListener('touchstart', (e) => {
 });
 
 restartBtn.addEventListener('click', resetGame);
-

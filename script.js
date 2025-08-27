@@ -55,8 +55,8 @@ let obstacleInterval;
 let scoreInterval;
 let isNight = false;
 
-const minObstacleInterval = 1000;
-const maxObstacleInterval = 1200;
+const minObstacleInterval = 1200;
+const maxObstacleInterval = 1500;
 
 const birdWidth = 25;
 const birdHeight = 15;

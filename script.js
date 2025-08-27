@@ -5,9 +5,9 @@ const highScoreDisplay = document.getElementById('high-score');
 const gameOverScreen = document.getElementById('game-over-screen');
 const restartBtn = document.getElementById('restart-btn');
 
-const originalCanvasWidth = 600;
-const originalCanvasHeight = 200;
-const groundY = 150;
+const originalCanvasWidth = 500;
+const originalCanvasHeight = 250;
+const groundY = 180;
 
 let dinoImg = new Image();
 dinoImg.src = 'images/dino.png';
@@ -64,9 +64,9 @@ const birdHeight = 15;
 const birdChance = 0.3;
 
 const minCactusWidth = 25; 
-const maxCactusWidth = 45; 
+const maxCactusWidth = 42; 
 const minCactusHeight = 25;
-const maxCactusHeight = 45; 
+const maxCactusHeight = 42; 
 
 function setupCanvas() {
     const gameContainer = document.getElementById('game-container');
@@ -81,7 +81,7 @@ function setupCanvas() {
 }
 
 function drawGround() {
-    ctx.fillStyle = '#8B4513';
+    ctx.fillStyle = '#C9ADA1';
     ctx.fillRect(0, groundY + dino.height, canvas.width, canvas.height - (groundY + dino.height));
 }
 
@@ -117,7 +117,7 @@ function updateDino() {
 function jump() {
     if (!dino.isJumping) {
         dino.isJumping = true;
-        dino.dy = -20;
+        dino.dy = -16;
         jumpSound.play();
     }
 }

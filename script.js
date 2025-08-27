@@ -53,8 +53,8 @@ let obstacleInterval;
 let scoreInterval;
 
 // --- Obstacle Generation Settings ---
-const minObstacleInterval = 750;
-const maxObstacleInterval = 1000;
+const minObstacleInterval = 1000;
+const maxObstacleInterval = 1200;
 
 const birdWidth = 25;
 const birdHeight = 15;

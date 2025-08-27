@@ -1,4 +1,4 @@
-Const canvas = document.getElementById('gameCanvas');
+const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreDisplay = document.getElementById('score');
 const highScoreDisplay = document.getElementById('high-score');

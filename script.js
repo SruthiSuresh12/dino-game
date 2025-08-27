@@ -120,7 +120,7 @@ function updateDino() {
 function jump() {
     if (!dino.isJumping) {
         dino.isJumping = true;
-        dino.dy = -16.5;
+        dino.dy = -16;
     }
 }
 

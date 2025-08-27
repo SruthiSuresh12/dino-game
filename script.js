@@ -6,8 +6,8 @@ const gameOverScreen = document.getElementById('game-over-screen');
 const restartBtn = document.getElementById('restart-btn');
 
 const originalCanvasWidth = 500;
-const originalCanvasHeight = 350;
-const groundY = 150;
+const originalCanvasHeight = 250;
+const groundY = 180;
 
 // --- Image Assets ---
 let dinoImg = new Image();
@@ -55,7 +55,7 @@ let isNight = false;
 
 // --- Obstacle Generation Settings ---
 const minObstacleInterval = 1200;
-const maxObstacleInterval = 1800;
+const maxObstacleInterval = 1400;
 
 const birdWidth = 25;
 const birdHeight = 15;
@@ -221,7 +221,7 @@ function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     // Day/Night sky color
-    ctx.fillStyle = isNight ? '#b5a2c8' : '#d8eceb';
+    ctx.fillStyle = isNight ? '#8093f1' : '#d8eceb';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     drawGround();
